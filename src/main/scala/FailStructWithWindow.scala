@@ -15,14 +15,21 @@ object FailStructWithWindow {
     val data = Seq(
       ("a", "b"),
       ("a", "b")
-    ).toDF("a", "b")
-      .select($"*", struct("a", "b").as("ab"))
-
+    ).toDF("a", "b").select($"*", struct("a", "b").as("ab"))
 
     val w = Window.partitionBy("a").orderBy("b")
 
     val e = data.select(first(struct("*")).over(w).as("o"))
 
     e.select("o.ab.*").show()
+
+    /* should return as below, as in spark 3.0.2 and 2.4.7
+    +---+---+
+    |  a|  b|
+    +---+---+
+    |  a|  b|
+    |  a|  b|
+    +---+---+
+     */
   }
 }
